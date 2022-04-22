@@ -1,8 +1,9 @@
 
 # import required modules
 
-import io
+
 import os
+import shutil
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobClient, BlobServiceClient
 from azure.storage.blob import ContainerClient
@@ -37,6 +38,8 @@ txtContainer = ContainerClient.from_connection_string(
     conn_str=co, container_name="bengolitxtcontainer")
 
 
+
+
 # getting  the client pdf container(for converting the pdf files that have been uploaded)
 pdfContainer = ContainerClient.from_connection_string(
     conn_str=co, container_name="bengolipdfcontainer")
@@ -49,6 +52,7 @@ pdfContainer = ContainerClient.from_connection_string(
 #     a list of blob text file names that are present in a container.
 #   */
 def gettingAllTxtBlobs(container):
+    print("Getting all Text files from the bengoli txt Container")
     l = []
     # flag = True
     blobTxtList = container.list_blobs()
@@ -57,6 +61,7 @@ def gettingAllTxtBlobs(container):
     else:
         if not (len(l) > 0):
             print("Container is Empty")
+    print("COMPLETED")
     return l
 
 
@@ -67,6 +72,7 @@ def gettingAllTxtBlobs(container):
 #     a list of blob pdf file names that are present in a container.
 #   */
 def gettingAllPdfBlobs(container):
+    print("Getting all pdf files from the bengoli txt Container")
     l = []
     # flag = True
     blobpdfList = container.list_blobs()
@@ -75,6 +81,7 @@ def gettingAllPdfBlobs(container):
     else:
         if not (len(l) > 0):
             print("BengoliTextContainer is Empty")
+    print("COMPLETED")
     return l
 
 
@@ -89,13 +96,14 @@ pdfList = gettingAllPdfBlobs(pdfContainer)
 # path folder where pdf will be saved
 folder = r"D:\19042022\pdf"
 def downloadBlob(filename):
+    print(f"Downloading {filename}")
     blob = BlobClient.from_connection_string(
         conn_str=co, container_name="bengolipdfcontainer", blob_name=filename)
     with open(folder+"\\"+filename, "wb") as my_blob:
         blob_data = blob.download_blob()
     
         blob_data.readinto(my_blob)
-        print(f"{filename} is done downloading")
+        print("COMPLETED")
 
 txtNList = [file.strip(".txt") for file in txtList]
 
@@ -129,15 +137,20 @@ def get_text_from_any_pdf(pdf_file):
 dirName = "text"
 for file in os.listdir(folder) :
     if os.path.isfile(os.path.join(folder,file)):
+        print("Performing OCR on")
+        print(f"{file}")
         data = get_text_from_any_pdf(folder+"\\"+file)
 
         if not (os.path.isdir(os.path.join(folder,dirName))):
+            print("making folder :text")
             os.mkdir(folder+"\\"+dirName)
             with open(folder+"\\"+dirName+"\\"+file+".txt","w+") as f:
+                print("Writing data into text file")
                 f.write(data)
         elif(os.path.isdir(os.path.join(folder,dirName))):
             full_path = os.path.join(folder,dirName)
             with open(full_path+"\\"+file.strip(".pdf")+".txt","w+") as f:
+                print("Writing data into text file")
                 f.write(data)
 
 
@@ -150,14 +163,25 @@ for file in os.listdir(os.path.join(folder,dirName)) :
     if os.path.isfile(file):
         blob = BlobClient.from_connection_string(conn_str=co, container_name="bengolitxtcontainer", blob_name=file)
         with open(os.path.abspath(file), "rb") as data:
+            print("uploading the text file")
+            print(f"{file}")
             blob.upload_blob(data)
+            print("COMPLETED")
 
 
 
 # delete all the files in the folder that has been downloaded
 def clearData(pathPara):
     if (os.path.isfile(pathPara)):
+        print("Removing file")
         os.remove(pathPara)
+        print("COMPLETED")
     elif(os.path.isdir(pathPara)):
-        os.rmdir(pathPara)
+        print("Removing folder")
+        shutil.rmtree(pathPara,ignore_errors=True)
+        print("COMPLETED")
 
+    
+
+for file in os.listdir(folder):
+    clearData(os.path.join(folder,file))
