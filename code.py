@@ -4,6 +4,7 @@
 
 import os
 import shutil
+from coverImage import makeCoverImg
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobClient, BlobServiceClient
 from azure.storage.blob import ContainerClient
@@ -134,11 +135,19 @@ def get_text_from_any_pdf(pdf_file):
     return final_text
 
 
+
+# Performing OCR on pdf files
 dirName = "text"
 for file in os.listdir(folder) :
     if os.path.isfile(os.path.join(folder,file)):
         print("Performing OCR on")
         print(f"{file}")
+
+        
+        #getting cover image(1st page of pdf file) and total
+        # number of pages..
+        
+        makeCoverImg(file)
         data = get_text_from_any_pdf(folder+"\\"+file)
 
         if not (os.path.isdir(os.path.join(folder,dirName))):
@@ -154,7 +163,7 @@ for file in os.listdir(folder) :
                 f.write(data)
 
 
-# uploading files after performing ocr
+# uploading text files after performing ocr
 flag = True
 for file in os.listdir(os.path.join(folder,dirName)) :
     if flag:

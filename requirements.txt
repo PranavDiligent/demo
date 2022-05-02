@@ -17,7 +17,9 @@ Pillow==9.1.0
 portalocker==2.4.0
 pycparser==2.21
 PyJWT==2.3.0
+PyMuPDF==1.19.6
 pyparsing==3.0.8
+PyPDF2==1.27.11
 pytesseract==0.3.9
 pywin32==303
 requests==2.27.1
